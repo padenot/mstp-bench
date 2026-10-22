@@ -1,0 +1,119 @@
+{
+  "plan": {
+    "experiment": "playout",
+    "rounds": 3,
+    "arms": [
+      {
+        "browser": "firefox",
+        "path": "audioworklet",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "firefox",
+        "path": "audioworklet",
+        "quantum": 512,
+        "realtime": true
+      },
+      {
+        "browser": "firefox",
+        "path": "worker",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "chrome",
+        "path": "audioworklet",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "chrome",
+        "path": "audioworklet",
+        "quantum": 512,
+        "realtime": true
+      },
+      {
+        "browser": "chrome",
+        "path": "worker",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "chrome",
+        "path": "mstp",
+        "quantum": 128,
+        "realtime": true
+      }
+    ],
+    "duration": 60,
+    "dsp": {
+      "mode": "copy"
+    },
+    "load": null,
+    "stalls": [
+      {
+        "atSeconds": 5,
+        "durationMs": 500
+      }
+    ]
+  },
+  "rows": {
+    "firefox-audioworklet-128": {
+      "Source \u2192 playback before stall, ms": "81\u201390",
+      "Peak after stall, ms": "546\u2013582",
+      "Added delay, last 5 s, ms": "299\u2013357",
+      "Jitter buffer, last 5 s, ms": "318\u2013365",
+      "Recorded audio intact": "3/3",
+      "Failed trials": 0
+    },
+    "firefox-audioworklet-512": {
+      "Source \u2192 playback before stall, ms": "92\u2013100",
+      "Peak after stall, ms": "578\u2013586",
+      "Added delay, last 5 s, ms": "288\u2013305",
+      "Jitter buffer, last 5 s, ms": "304\u2013316",
+      "Recorded audio intact": "3/3",
+      "Failed trials": 0
+    },
+    "firefox-worker-128": {
+      "Source \u2192 playback before stall, ms": "73\u2013105",
+      "Peak after stall, ms": "531\u2013558",
+      "Added delay, last 5 s, ms": "272\u2013309",
+      "Jitter buffer, last 5 s, ms": "300\u2013329",
+      "Recorded audio intact": "3/3",
+      "Failed trials": 0
+    },
+    "chrome-audioworklet-128": {
+      "Source \u2192 playback before stall, ms": "120\u2013143",
+      "Peak after stall, ms": "152\u2013600",
+      "Added delay, last 5 s, ms": "14\u201341",
+      "Jitter buffer, last 5 s, ms": "38\u201358",
+      "Recorded audio intact": "0/3",
+      "Failed trials": 0
+    },
+    "chrome-audioworklet-512": {
+      "Source \u2192 playback before stall, ms": "107\u2013132",
+      "Peak after stall, ms": "579\u2013607",
+      "Added delay, last 5 s, ms": "75\u2013109",
+      "Jitter buffer, last 5 s, ms": "43\u201359",
+      "Recorded audio intact": "0/3",
+      "Failed trials": 0
+    },
+    "chrome-worker-128": {
+      "Source \u2192 playback before stall, ms": "94\u2013123",
+      "Peak after stall, ms": "596\u2013632",
+      "Added delay, last 5 s, ms": "472\u2013508",
+      "Jitter buffer, last 5 s, ms": "51\u201363",
+      "Recorded audio intact": "3/3",
+      "Failed trials": 0
+    },
+    "chrome-mstp-128": {
+      "Source \u2192 playback before stall, ms": "85\u201396",
+      "Peak after stall, ms": "557\u2013567",
+      "Added delay, last 5 s, ms": "305\u2013409",
+      "Jitter buffer, last 5 s, ms": "329\u2013435",
+      "Recorded audio intact": "3/3",
+      "Failed trials": 0
+    }
+  }
+}

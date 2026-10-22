@@ -1,0 +1,54 @@
+{
+  "experiment": "contention",
+  "rounds": 3,
+  "arms": [
+    {
+      "browser": "firefox",
+      "path": "audioworklet",
+      "quantum": 128,
+      "realtime": true
+    },
+    {
+      "browser": "firefox",
+      "path": "worker",
+      "quantum": 128,
+      "realtime": true
+    },
+    {
+      "browser": "chrome",
+      "path": "audioworklet",
+      "quantum": 128,
+      "realtime": true
+    },
+    {
+      "browser": "chrome",
+      "path": "worker",
+      "quantum": 128,
+      "realtime": true
+    },
+    {
+      "browser": "chrome",
+      "path": "mstp",
+      "quantum": 128,
+      "realtime": true
+    },
+    {
+      "browser": "firefox",
+      "path": "audioworklet",
+      "quantum": 128,
+      "realtime": false
+    }
+  ],
+  "duration": 40,
+  "dsp": {
+    "mode": "fir",
+    "taps": 16384,
+    "gain": 0.5
+  },
+  "stalls": [],
+  "load": {
+    "workers": 64,
+    "atSeconds": 10,
+    "seconds": 20
+  }
+}

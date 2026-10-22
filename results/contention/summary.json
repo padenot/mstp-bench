@@ -1,0 +1,112 @@
+{
+  "plan": {
+    "experiment": "contention",
+    "rounds": 3,
+    "arms": [
+      {
+        "browser": "firefox",
+        "path": "audioworklet",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "firefox",
+        "path": "worker",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "chrome",
+        "path": "audioworklet",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "chrome",
+        "path": "worker",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "chrome",
+        "path": "mstp",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "firefox",
+        "path": "audioworklet",
+        "quantum": 128,
+        "realtime": false
+      }
+    ],
+    "duration": 40,
+    "dsp": {
+      "mode": "fir",
+      "taps": 16384,
+      "gain": 0.5
+    },
+    "stalls": [],
+    "load": {
+      "workers": 64,
+      "atSeconds": 10,
+      "seconds": 20
+    }
+  },
+  "rows": {
+    "firefox-audioworklet-128": {
+      "Recorded audio intact": "3/3",
+      "Backlog p95, ms (before / load / after)": "18\u201321 / 22\u201323 / 22\u201323",
+      "DSP ms per audio s": "134\u2013313 / 124\u2013125 / 124\u2013150",
+      "Source \u2192 playback p50, ms": "85\u2013127 / 92\u2013126 / 90\u2013118",
+      "Jitter buffer target, ms": "20\u201360 / 20\u201360 / 20\u201360",
+      "Concealed under load, ms": "0",
+      "Failed trials": 0
+    },
+    "firefox-worker-128": {
+      "Recorded audio intact": "3/3",
+      "Backlog p95, ms (before / load / after)": "15 / 15\u201396 / 15",
+      "DSP ms per audio s": "173\u2013264 / 158\u2013232 / 126\u2013175",
+      "Source \u2192 playback p50, ms": "100\u2013119 / 117\u2013275 / 104\u2013231",
+      "Jitter buffer target, ms": "60\u201380 / 60\u2013200 / 40\u2013100",
+      "Concealed under load, ms": "0\u201372",
+      "Failed trials": 0
+    },
+    "chrome-audioworklet-128": {
+      "Recorded audio intact": "3/3",
+      "Backlog p95, ms (before / load / after)": "22\u201332 / 22\u201332 / 22\u201332",
+      "DSP ms per audio s": "129\u2013160 / 127\u2013129 / 125\u2013168",
+      "Source \u2192 playback p50, ms": "101\u2013131 / 101\u2013131 / 96\u2013126",
+      "Jitter buffer target, ms": "20\u201340 / 20\u201340 / 20\u201340",
+      "Concealed under load, ms": "0",
+      "Failed trials": 0
+    },
+    "chrome-worker-128": {
+      "Recorded audio intact": "3/3",
+      "Backlog p95, ms (before / load / after)": "15 / 15\u201320 / 15\u201320",
+      "DSP ms per audio s": "152\u2013172 / 128\u2013136 / 130\u2013172",
+      "Source \u2192 playback p50, ms": "102\u2013127 / 102\u2013127 / 98\u2013123",
+      "Jitter buffer target, ms": "40 / 40 / 40",
+      "Concealed under load, ms": "0",
+      "Failed trials": 0
+    },
+    "chrome-mstp-128": {
+      "Recorded audio intact": "3/3",
+      "Backlog p95, ms (before / load / after)": "5 / 6 / 5\u20136",
+      "DSP ms per audio s": "127\u2013144 / 127 / 127\u2013179",
+      "Source \u2192 playback p50, ms": "83\u201386 / 82\u201386 / 78\u201382",
+      "Jitter buffer target, ms": "20 / 20 / 20",
+      "Concealed under load, ms": "0",
+      "Failed trials": 0
+    },
+    "firefox-audioworklet-128-no-rt": {
+      "Recorded audio intact": "2/3",
+      "Backlog p95, ms (before / load / after)": "27 / 28\u2013145 / 28\u201354",
+      "DSP ms per audio s": "125\u2013308 / 144\u2013242 / 127\u2013189",
+      "Source \u2192 playback p50, ms": "83\u201394 / 110\u2013308 / 109\u2013302",
+      "Jitter buffer target, ms": "20\u201340 / 40\u2013220 / 40\u2013180",
+      "Concealed under load, ms": "0\u2013163",
+      "Failed trials": 0
+    }
+  }
+}

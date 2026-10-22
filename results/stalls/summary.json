@@ -1,0 +1,127 @@
+{
+  "plan": {
+    "experiment": "stalls",
+    "rounds": 3,
+    "arms": [
+      {
+        "browser": "firefox",
+        "path": "audioworklet",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "firefox",
+        "path": "audioworklet",
+        "quantum": 512,
+        "realtime": true
+      },
+      {
+        "browser": "firefox",
+        "path": "worker",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "chrome",
+        "path": "audioworklet",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "chrome",
+        "path": "audioworklet",
+        "quantum": 512,
+        "realtime": true
+      },
+      {
+        "browser": "chrome",
+        "path": "worker",
+        "quantum": 128,
+        "realtime": true
+      },
+      {
+        "browser": "chrome",
+        "path": "mstp",
+        "quantum": 128,
+        "realtime": true
+      }
+    ],
+    "duration": 22,
+    "dsp": {
+      "mode": "copy"
+    },
+    "load": null,
+    "stalls": [
+      {
+        "atSeconds": 5,
+        "durationMs": 100
+      },
+      {
+        "atSeconds": 10,
+        "durationMs": 200
+      },
+      {
+        "atSeconds": 15,
+        "durationMs": 500
+      }
+    ]
+  },
+  "rows": {
+    "firefox-audioworklet-128": {
+      "Recorded audio intact": "3/3",
+      "Recording timeline intact": "3/3",
+      "Catch-up after 500 ms stall, ms": "1, 1, 1",
+      "Backlog before stalls (p95), ms": "16\u201320",
+      "Source \u2192 playback before stalls, ms": "83\u201387",
+      "Failed trials": 0
+    },
+    "firefox-audioworklet-512": {
+      "Recorded audio intact": "3/3",
+      "Recording timeline intact": "3/3",
+      "Catch-up after 500 ms stall, ms": "0, 1, 1",
+      "Backlog before stalls (p95), ms": "23\u201328",
+      "Source \u2192 playback before stalls, ms": "97\u2013104",
+      "Failed trials": 0
+    },
+    "firefox-worker-128": {
+      "Recorded audio intact": "3/3",
+      "Recording timeline intact": "3/3",
+      "Catch-up after 500 ms stall, ms": "2, 2, 2",
+      "Backlog before stalls (p95), ms": "9\u201315",
+      "Source \u2192 playback before stalls, ms": "76\u201383",
+      "Failed trials": 0
+    },
+    "chrome-audioworklet-128": {
+      "Recorded audio intact": "0/3",
+      "Recording timeline intact": "0/3",
+      "Catch-up after 500 ms stall, ms": "never, never, never",
+      "Backlog before stalls (p95), ms": "27\u201332",
+      "Source \u2192 playback before stalls, ms": "119\u2013133",
+      "Failed trials": 0
+    },
+    "chrome-audioworklet-512": {
+      "Recorded audio intact": "0/3",
+      "Recording timeline intact": "0/3",
+      "Catch-up after 500 ms stall, ms": "never, never, never",
+      "Backlog before stalls (p95), ms": "22\u201327",
+      "Source \u2192 playback before stalls, ms": "115\u2013127",
+      "Failed trials": 0
+    },
+    "chrome-worker-128": {
+      "Recorded audio intact": "3/3",
+      "Recording timeline intact": "0/3",
+      "Catch-up after 500 ms stall, ms": "never, never, never",
+      "Backlog before stalls (p95), ms": "9\u201315",
+      "Source \u2192 playback before stalls, ms": "99\u2013118",
+      "Failed trials": 0
+    },
+    "chrome-mstp-128": {
+      "Recorded audio intact": "3/3",
+      "Recording timeline intact": "0/3",
+      "Catch-up after 500 ms stall, ms": "1, 1, 1",
+      "Backlog before stalls (p95), ms": "5\u20136",
+      "Source \u2192 playback before stalls, ms": "81\u201390",
+      "Failed trials": 0
+    }
+  }
+}

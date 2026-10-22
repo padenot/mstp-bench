@@ -1,0 +1,43 @@
+...@style
+grid-columns: 2
+horizontal-gap: 140
+
+sender: "Browser process 1 · sender" {
+  class: computer
+  device: "AudioContext · device clock" {
+    class: context
+    source: "Source: any MediaStream\ntest signal here" {class: source}
+    monitor: "Monitoring output" {class: node}
+    source -> monitor: {class: edge}
+  }
+  path: "Processing path\naudioworklet · worker · mstp" {class: dsp}
+  recorder: "MediaRecorder\nlocal recording" {class: node}
+  pc: "RTCPeerConnection" {class: node}
+  device.source -> path: "MediaStreamTrack\nor AudioNode" {class: edge}
+  path -> recorder: "processed track" {class: edge}
+  path -> pc: "processed track" {class: edge}
+  p1: "1" {class: probe}
+  p2: "2" {class: probe}
+  p3: "3" {class: probe}
+  p1 -> device.source: {class: probe-edge}
+  p2 -> path: {class: probe-edge}
+  p3 -> recorder: {class: probe-edge}
+}
+
+receiver: "Browser process 2 · receiver" {
+  class: computer
+  pc: "RTCPeerConnection\njitter buffer" {class: node}
+  device: "AudioContext · device clock" {
+    class: context
+    tap: "tap\nAudioWorklet" {class: node}
+    out: "Playback output" {class: node}
+    tap -> out: {class: edge}
+  }
+  pc -> device.tap: {class: edge}
+  p4: "4" {class: probe}
+  p4 -> device.tap: {class: probe-edge}
+  p5: "5" {class: probe}
+  p5 -> pc: {class: probe-edge}
+}
+
+sender.pc -> receiver.pc: "Opus, loopback" {class: edge}

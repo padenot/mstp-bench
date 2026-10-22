@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+{# Page shell for site/index.html: `just site`. Text and tabs come from site.toml,
+   each tab's panel from content/<id>.md. #}
+<!-- Generated from site/page.html by tools/build_site.py; do not edit. -->
+<html lang="en" data-brand="firefox" data-color-scheme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <style>
+{% include "vendor/tokens.css" %}
+  </style>
+  <style>
+{% include "vendor/components.css" %}
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap">
+  <style>
+{% include "style.css" %}
+  </style>
+</head>
+<body>
+  <header class="moz-masthead">
+    {{ logo("firefox-lockup") }}
+  </header>
+
+  <section class="moz-hero" aria-labelledby="title">
+    <h1 class="display" id="title">{{ heading }}</h1>
+    {% if lede %}
+    <p class="lede">{{ lede }}</p>
+    {% endif %}
+    <p class="meta">{{ meta }}</p>
+  </section>
+
+  <div class="moz-page">
+    <nav class="moz-page-nav" aria-label="Sections">
+      <button class="moz-page-nav-button collapse" type="button" aria-expanded="true" hidden>{{ icon("chevron-left") }}<span class="label">Collapse</span></button>
+      {% for group in groups %}
+      {% if not loop.first %}
+      <hr>
+      {% endif %}
+      <div class="group">
+        {% for tab in group %}
+        <a class="moz-page-nav-button" href="{{ tab.href or '#' ~ tab.id }}"{% if tab.id == panels[0].id %} aria-current="true"{% endif %} title="{{ tab.label }}">{{ icon(tab.icon) }}<span class="label">{{ tab.label }}</span></a>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </nav>
+
+    <main class="moz-main wide">
+      {% for panel in panels %}
+      <section class="panel" id="{{ panel.id }}">
+{{ panel.html }}
+      </section>
+      {% endfor %}
+    </main>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll(".moz-page-nav-button[href^='#']");
+    function select() {
+      // :target isn't set yet while the page loads, so read the fragment.
+      const target = document.getElementById(location.hash.slice(1));
+      const panel = target?.classList.contains("panel") ? target.id : "{{ panels[0].id }}";
+      for (const tab of tabs) {
+        if (tab.hash === `#${panel}`) {
+          tab.setAttribute("aria-current", "true");
+        } else {
+          tab.removeAttribute("aria-current");
+        }
+      }
+    }
+    addEventListener("hashchange", select);
+    select();
+
+    const collapse = document.querySelector(".collapse");
+    collapse.hidden = false;
+    collapse.addEventListener("click", () => {
+      const collapsed = document.querySelector(".moz-page").classList.toggle("collapsed");
+      collapse.setAttribute("aria-expanded", String(!collapsed));
+    });
+  </script>
+</body>
+</html>

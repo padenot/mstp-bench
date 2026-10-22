@@ -1,0 +1,29 @@
+...@style
+grid-columns: 3
+horizontal-gap: 100
+
+device: "Source: any MediaStreamTrack\nhere a test signal" {
+  class: source-context
+  source: "test signal\nAudioWorklet" {class: node}
+  destination: "MediaStreamAudioDestinationNode" {class: node}
+  source -> destination: {class: edge}
+}
+mstpg: "MediaStreamTrackProcessor/Generator" {
+  class: context
+  processor: "MediaStreamTrackProcessor\nmaxBufferSize: 100" {class: node}
+  worker: "Dedicated worker" {
+    class: context
+    dsp: "DSP\nmay stall" {class: dsp}
+    p2: "2" {class: probe}
+    p2 -> dsp: {class: probe-edge}
+  }
+  generator: "MediaStreamTrackGenerator" {class: node}
+  processor -> worker.dsp: "ReadableStream\nof AudioData" {class: edge}
+  worker.dsp -> generator: "WritableStream\nof AudioData" {class: edge}
+}
+consumers: "" {
+  class: cell
+  out: "MediaRecorder\nRTCPeerConnection" {class: node}
+}
+device.destination -> mstpg.processor: "MediaStreamTrack" {class: edge}
+mstpg.generator -> consumers.out: "processed track" {class: edge}

@@ -1,0 +1,29 @@
+...@style
+grid-columns: 4
+horizontal-gap: 100
+
+device: "AudioContext · device clock" {
+  class: context
+  source: "Source: any MediaStream\ntest signal here" {class: source}
+  writer: "ring-writer\nAudioWorklet\nnever blocks" {class: node}
+  source -> writer: {class: edge}
+}
+worker: "Dedicated worker" {
+  class: context
+  dsp: "DSP\nmay stall" {class: dsp}
+}
+sinkless: "AudioContext · sinkId { type: \"none\" }" {
+  class: context
+  reader: "ring-reader\nAudioWorklet\nwaits for each block" {class: node}
+  output: "MediaStreamAudioDestinationNode" {class: node}
+  p2: "2" {class: probe}
+  reader -> output: {class: edge}
+  p2 -> reader: {class: probe-edge}
+}
+consumers: "" {
+  class: cell
+  out: "MediaRecorder\nRTCPeerConnection" {class: node}
+}
+device.writer -> worker.dsp: "SharedArrayBuffer\nring" {class: edge}
+worker.dsp -> sinkless.reader: "SharedArrayBuffer\nring" {class: edge}
+sinkless.output -> consumers.out: "processed track" {class: edge}

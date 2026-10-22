@@ -1,0 +1,84 @@
+/* Page styles on top of site/vendor/ (Mozilla Acorn); inlined by tools/build_site.py. */
+
+/* Inter throughout, in place of the brand's Mozilla Text and Headline. Inter
+   has no width axis, so the brand's condensed headings and numbers go too. */
+:root {
+  --font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+  --font-family-heading: var(--font-family);
+  --font-stretch-heading: normal;
+  --font-stretch-number: normal;
+}
+
+.moz-hero { margin-block-end: 0; }
+.moz-hero :is(.display, .lede) { max-width: none; }
+.moz-hero .meta { margin: var(--space-large) 0 0; font-size: var(--font-size-small); color: var(--text-color-deemphasized); }
+
+/* One panel per tab. The tab is the URL fragment, so tabs work without
+   script; the script below only moves aria-current. */
+.panel { display: none; }
+.panel:target, .moz-main:not(:has(.panel:target)) > #overview { display: block; }
+.panel > h2:first-child { margin-block-start: 0; }
+.panel h3 { margin-block: var(--space-xxlarge) var(--space-medium); }
+.panel :is(p, ul, ol) { max-width: 88ch; }
+.panel li + li { margin-block-start: var(--space-xsmall); }
+.panel .meta { font-size: var(--font-size-small); color: var(--text-color-deemphasized); }
+
+/* Collapsed tab rail: icons only. Labels stay available to assistive technology. */
+.moz-page.collapsed .moz-page-nav { width: auto; }
+.moz-page.collapsed .moz-page-nav .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.moz-page.collapsed .collapse .moz-icon { transform: scaleX(-1); }
+
+/* d2 diagrams: full width, never enlarged past their own size, recolored
+   through their d2 classes so they follow the theme. */
+.diagram { margin: var(--space-large) 0 var(--space-xlarge); }
+.diagram > svg { display: block; width: min(100%, calc(var(--diagram-width) * 1px)); height: auto; }
+.diagram .d2-svg > rect { fill: transparent; }
+.diagram .shape > * { fill: var(--background-color-box); stroke: var(--border-color); }
+.diagram .cell > .shape > * { fill: transparent; stroke: transparent; }
+.diagram .computer > .shape > * { fill: transparent; stroke: var(--text-color-deemphasized); }
+.diagram .context > .shape > * { stroke: var(--text-color); }
+.diagram .source-context > .shape > * { fill: transparent; stroke: var(--text-color); }
+.diagram .lane > .shape > * { fill: var(--background-color-canvas); stroke: var(--border-color-deemphasized); }
+.diagram .dsp > .shape > * { fill: var(--background-color-box-info); stroke: var(--text-color); }
+.diagram .probe > .shape > * { fill: var(--button-background-color-primary); stroke: var(--button-background-color-primary); }
+.diagram text { fill: var(--text-color); }
+.diagram .probe text { fill: var(--button-text-color-primary); }
+.diagram .edge path { stroke: var(--text-color-deemphasized); }
+.diagram .edge polygon { fill: var(--text-color-deemphasized); stroke: var(--text-color-deemphasized); }
+.diagram .edge text { fill: var(--text-color-deemphasized); }
+.diagram .probe-edge path { stroke: var(--border-color); }
+.diagram .probe-edge polygon { fill: var(--border-color); stroke: var(--border-color); }
+
+/* The measurement points under the call diagram, numbered like its probes. */
+#overview ol { padding: 0; list-style: none; counter-reset: probe; }
+#overview ol > li { counter-increment: probe; }
+#overview ol > li::before {
+  content: counter(probe);
+  display: inline-grid; place-items: center; vertical-align: middle;
+  margin-inline-end: var(--space-small);
+  width: 1.6em; height: 1.6em; border-radius: 50%;
+  background-color: var(--button-background-color-primary);
+  color: var(--button-text-color-primary);
+  font-size: var(--font-size-small); font-weight: var(--font-weight-bold);
+}
+
+/* Check status: icon, color and the value itself. */
+.moz-icon[data-icon="checkmark"] { color: var(--icon-color-success); }
+.moz-icon[data-icon="warning-fill"] { color: var(--icon-color-warning); }
+.moz-icon[data-icon="error-fill"] { color: var(--icon-color-critical); }
+.moz-table td .moz-icon { vertical-align: text-bottom; margin-inline-end: var(--space-xsmall); }
+.moz-table :is(td, th) { vertical-align: top; }
+.legend { display: flex; flex-wrap: wrap; gap: var(--space-xlarge); margin: 0 0 var(--space-large); padding: 0; list-style: none; font-size: var(--font-size-small); }
+.legend li { display: inline-flex; align-items: center; gap: var(--space-small); }
+.legend li + li { margin: 0; }
+
+/* Results tables: rows grouped by browser, highlighted checks. */
+.results thead th { vertical-align: bottom; }
+.results th .unit { display: block; font-weight: var(--font-weight); }
+.results tbody th { text-align: start; }
+.results tbody tr.group-start > * { border-block-start: calc(2 * var(--border-width)) solid var(--border-color); }
+.results tbody tr.arm-start > * { border-block-start: var(--border-width) solid var(--border-color); }
+.results td { white-space: nowrap; }
+.results td.phase { color: var(--text-color-deemphasized); }
+.results td.partial { background-color: var(--background-color-warning); }
+.results td.fail { background-color: var(--background-color-critical); font-weight: var(--font-weight-semibold); }

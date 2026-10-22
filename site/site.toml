@@ -1,0 +1,25 @@
+# Page text and navigation for site/index.html, rendered through site/page.html.
+
+title = "Audio processing: MSTP/G vs. web standards"
+heading = "MSTP/G for audio vs. current web standards"
+meta = "Apple M4 Max, macOS 26.6.2, 44.1 kHz; Chrome 156.0.8078.47; Firefox 160.0a1 (patched to implement more standards); Safari 26.6.2"
+
+# Navigation groups, separated by a rule. A tab with an id shows
+# site/content/<id>.md; the first one is the default. A tab with an href is a link.
+groups = [
+  [
+    { id = "overview", label = "Overview", icon = "home" },
+  ],
+  [
+    { id = "stalls", label = "Stalls", icon = "activity" },
+    { id = "playout", label = "Receiver playback", icon = "sync" },
+    { id = "contention", label = "CPU contention", icon = "dashboard" },
+    { id = "subnormals", label = "Subnormals", icon = "warning" },
+    { id = "timestamps", label = "Timestamp alignment", icon = "history" },
+  ],
+  [
+    { id = "safari", label = "Safari", icon = "globe" },
+    { id = "running", label = "Running", icon = "settings" },
+    { href = "https://github.com/padenot/mstp-bench", label = "Code", icon = "external-link" },
+  ],
+]

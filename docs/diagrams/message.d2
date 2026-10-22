@@ -1,0 +1,31 @@
+...@style
+grid-columns: 4
+horizontal-gap: 100
+
+device: "Source: any MediaStreamTrack\nhere a test signal" {
+  class: source-context
+  source: "test signal\nAudioWorklet" {class: node}
+  destination: "MediaStreamAudioDestinationNode" {class: node}
+  source -> destination: {class: edge}
+}
+sinkless: "AudioContext · sinkId { type: \"none\" }" {
+  class: context
+  input: "MediaStreamAudioSourceNode" {class: node}
+  sender: "sender\nAudioWorklet" {class: node}
+  receiver: "receiver\nAudioWorklet" {class: node}
+  output: "MediaStreamAudioDestinationNode" {class: node}
+  input -> sender: {class: edge}
+  receiver -> output: {class: edge}
+}
+worker: "Dedicated worker" {
+  class: context
+  dsp: "DSP\nany worker API\nmay stall" {class: dsp}
+}
+consumers: "" {
+  class: cell
+  out: "MediaRecorder\nRTCPeerConnection" {class: node}
+}
+device.destination -> sinkless.input: "MediaStreamTrack" {class: edge}
+sinkless.sender -> worker.dsp: "postMessage / ring buffer" {class: edge}
+worker.dsp -> sinkless.receiver: "postMessage / ring buffer" {class: edge}
+sinkless.output -> consumers.out: "processed track" {class: edge}

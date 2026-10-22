@@ -1,0 +1,1409 @@
+/* Mozilla Acorn components for standalone HTML.
+ *
+ * Class-based ports of Firefox's moz-* reusable components
+ * (toolkit/content/widgets/) plus base element styles from
+ * toolkit/themes/shared/in-content/common-shared.css and
+ * design-system/src/text-and-typography.css. Requires tokens.css first.
+ *
+ * Brand themes: <html data-brand="firefox"> or <html data-brand="mozilla">.
+ * Without data-brand you get the Firefox product (Acorn, Nova) look.
+ *
+ * Source: This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* Page CSS outside these layers always wins, so override freely. */
+@layer moz-tokens, moz-brand, moz-base, moz-components;
+
+/* ------------------------------------------------------------------------
+ * Additions to the Acorn tokens (fonts, layout, charts)
+ * ------------------------------------------------------------------------ */
+@layer moz-tokens {
+  :root {
+    --font-family: system-ui, -apple-system, "Segoe UI", Ubuntu, Cantarell, "Noto Sans", sans-serif;
+    --font-family-heading: var(--font-family);
+    --font-family-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --font-stretch-heading: normal;
+    /* h1 / h2 weights; --font-weight-heading (Acorn) covers h3 and component headings. */
+    --font-weight-display: var(--font-weight-semibold);
+    --font-weight-headline: var(--font-weight-semibold);
+    /* XL display type in .moz-hero, and big numbers in .moz-stat. */
+    --font-weight-hero: var(--font-weight-display);
+    --font-stretch-number: normal;
+    --font-weight-number: var(--font-weight-semibold);
+    --line-height-body: 1.5;
+    --line-height-heading: 1.25;
+    --letter-spacing-display: normal;
+
+    --page-wide-content-width: 1200px;
+    --page-gutter: var(--space-xxlarge);
+
+    /* Categorical chart colors: five slots, used in order, plus
+     * --chart-neutral for "Other". Chosen so that adjacent slots stay apart
+     * under protan/deutan simulation (OKLab dE >= 16) in light and dark, with
+     * the same color in both schemes, and without Acorn's status hues
+     * (green, yellow, red). Checked with the dataviz palette validator on
+     * every canvas and card surface, Firefox brand included. --chart-2 on light
+     * surfaces and --chart-1/-3 on the dark card sit just under 3:1, so marks
+     * need direct labels or a data table. */
+    --chart-1: var(--color-violet-50);
+    --chart-2: var(--color-cyan-40);
+    --chart-3: var(--color-blue-50);
+    --chart-4: var(--color-orange-50);
+    --chart-5: var(--color-purple-40);
+    --chart-neutral: light-dark(var(--color-gray-50), var(--color-gray-40));
+    --chart-gridline: var(--border-color-deemphasized);
+    --chart-divider: var(--background-color-box);
+    /* Sequential ramp (low to high) and diverging ends. */
+    --chart-seq-1: light-dark(var(--color-violet-10), var(--color-violet-90));
+    --chart-seq-2: light-dark(var(--color-violet-30), var(--color-violet-70));
+    --chart-seq-3: light-dark(var(--color-violet-50), var(--color-violet-50));
+    --chart-seq-4: light-dark(var(--color-violet-70), var(--color-violet-30));
+    --chart-seq-5: light-dark(var(--color-violet-90), var(--color-violet-10));
+    --chart-diverging-low: light-dark(var(--color-orange-50), var(--color-orange-30));
+    --chart-diverging-mid: light-dark(var(--color-gray-20), var(--color-gray-60));
+    --chart-diverging-high: light-dark(var(--color-violet-50), var(--color-violet-30));
+  }
+}
+
+/* ------------------------------------------------------------------------
+ * Brand themes
+ * Colors only apply outside high-contrast modes; there the Acorn system
+ * color mappings take over, as they do in Firefox.
+ * ------------------------------------------------------------------------ */
+@layer moz-brand {
+  :root:is([data-brand="firefox"], [data-brand="mozilla"]) {
+    --font-family: "Mozilla Text", "Helvetica Neue", Arial, sans-serif;
+    --font-family-heading: "Mozilla Headline", "Helvetica Neue", Arial, sans-serif;
+    --line-height-body: 1.4;
+    --line-height-heading: 1;
+    --letter-spacing-display: -0.02em;
+    /* Brand display type starts at 24px; Headline is never used smaller. */
+    --font-size-heading-xlarge: 2.4rem;
+    --font-size-heading-large: 1.6rem;
+    --font-size-heading-medium: 1.267rem;
+  }
+
+  /* Firefox brand: purples and cream; Mozilla Headline Condensed display. */
+  :root[data-brand="firefox"] {
+    --firefox-midnight-purple: #210340;
+    --firefox-dark-purple: #3a0f6e;
+    --firefox-purple: #7543e3;
+    --firefox-soft-purple: #f1e7f8;
+    --firefox-pink: #ffeafe;
+    --firefox-cream: #fcf5f0;
+    --firefox-black: #15141a;
+    --firefox-purple-m4: #2e0957;
+    --firefox-purple-m2: #4e2095;
+    --firefox-purple-m1: #6132bc;
+    --firefox-purple-p2: #ad8df0;
+    --firefox-purple-p3: #c8b2f6;
+    --firefox-purple-p4: #e4d7fc;
+    --firefox-gradient: linear-gradient(to bottom, #ffeb49 0%, #ff6600 57%, #fb2872 100%);
+    --firefox-gradient-world: linear-gradient(to top, #271aff, #e752ff);
+    --firefox-gradient-dark: radial-gradient(133% 133% at 50% -33%, #8b37c1, #210340);
+
+    --font-stretch-heading: 75%;
+    --font-weight-display: var(--font-weight-bold);
+    --font-weight-headline: var(--font-weight-semibold);
+    --font-stretch-number: 75%;
+    --font-weight-number: var(--font-weight-bold);
+  }
+
+  @media not ((prefers-contrast) or (forced-colors)) {
+    :root[data-brand="firefox"] {
+      --background-color-canvas: light-dark(var(--firefox-cream), var(--firefox-midnight-purple));
+      --background-color-box: light-dark(#ffffff, var(--firefox-purple-m4));
+      --background-color-box-info: light-dark(var(--firefox-soft-purple), var(--firefox-dark-purple));
+      --text-color: light-dark(var(--firefox-black), #ffffff);
+      --color-accent-primary: light-dark(var(--firefox-purple), var(--firefox-purple-p2));
+      --color-accent-primary-hover: light-dark(var(--firefox-purple-m1), var(--firefox-purple-p3));
+      --color-accent-primary-active: light-dark(var(--firefox-purple-m2), var(--firefox-purple-p4));
+      --button-text-color: var(--text-color);
+      --button-text-color-hover: var(--text-color);
+      --button-text-color-active: var(--text-color);
+      --button-background-color-hover: light-dark(var(--firefox-soft-purple), var(--firefox-dark-purple));
+      --button-background-color-active: light-dark(var(--firefox-purple-p4), var(--firefox-purple-m2));
+      --button-text-color-primary: light-dark(#ffffff, var(--firefox-midnight-purple));
+      --button-text-color-primary-hover: var(--button-text-color-primary);
+      --button-text-color-primary-active: var(--button-text-color-primary);
+      --background-color-information: light-dark(var(--firefox-soft-purple), var(--firefox-dark-purple));
+      --icon-color-information: light-dark(var(--firefox-purple), var(--firefox-purple-p2));
+      /* Brand rule: no colored text. Links stay text-colored and underlined. */
+      --link-color: var(--text-color);
+      --link-color-visited: var(--text-color);
+      --link-color-hover: var(--color-accent-primary);
+      --link-color-active: var(--color-accent-primary-active);
+      --table-background-color: var(--background-color-box);
+      --table-row-background-color: var(--background-color-box);
+      --table-row-background-color-alternate: light-dark(var(--firefox-soft-purple), var(--firefox-dark-purple));
+    }
+    /* Component tokens are declared on the component itself, so brand
+     * overrides for them have to target the component. */
+    :root[data-brand="firefox"] .moz-promo {
+      --promo-background-color-vibrant: light-dark(var(--firefox-soft-purple), var(--firefox-dark-purple));
+      --promo-message-text-color-vibrant: var(--text-color);
+    }
+    :root[data-brand="firefox"] .moz-badge {
+      --badge-background-color-filled: var(--color-accent-primary);
+      --badge-text-color-filled: var(--button-text-color-primary);
+    }
+  }
+
+  /* Mozilla brand: black and white with a pop of green (45/45/10). */
+  :root[data-brand="mozilla"] {
+    --mozilla-white: #fafafa;
+    --mozilla-black: #161616;
+    --mozilla-green: #00d230;
+    --mozilla-green-p1: #d6ffcd;
+    --mozilla-green-m1: #28733f;
+    --mozilla-green-m2: #022611;
+    --mozilla-pink: #ff97e2;
+    --mozilla-pink-m1: #ae49ec;
+    --mozilla-orange: #ff9456;
+    --mozilla-orange-m1: #ff453f;
+
+    --font-weight-display: 400;
+    --font-weight-headline: 400;
+    /* XL headlines and large numbers: Headline ExtraLight; numbers condensed. */
+    --font-weight-hero: 200;
+    --font-stretch-number: 75%;
+    --font-weight-number: 200;
+    --card-box-shadow: none;
+    --card-box-shadow-hover: none;
+  }
+
+  @media not ((prefers-contrast) or (forced-colors)) {
+    :root[data-brand="mozilla"] {
+      --background-color-canvas: light-dark(var(--mozilla-white), var(--mozilla-black));
+      /* "Don't use strong white or strong black as backgrounds": boxes sit
+       * on the canvas color and are separated by borders instead. */
+      --background-color-box: var(--background-color-canvas);
+      --background-color-box-info: light-dark(var(--mozilla-green-p1), var(--mozilla-green-m2));
+      --background-color-information: var(--background-color-box-info);
+      --icon-color-information: light-dark(var(--mozilla-green-m1), var(--mozilla-green));
+      --text-color: light-dark(#000000, #ffffff);
+      --card-border-color: color-mix(in srgb, currentColor 24%, transparent);
+      --color-accent-primary: light-dark(#000000, var(--mozilla-green));
+      --color-accent-primary-hover: light-dark(var(--mozilla-black), var(--mozilla-green-p1));
+      --color-accent-primary-active: light-dark(var(--mozilla-black), var(--mozilla-green-p1));
+      --button-text-color: var(--text-color);
+      --button-text-color-hover: var(--text-color);
+      --button-text-color-active: var(--text-color);
+      --button-border-color: currentColor;
+      --button-background-color-hover: color-mix(in srgb, currentColor 8%, transparent);
+      --button-background-color-active: color-mix(in srgb, currentColor 16%, transparent);
+      --button-background-color-primary: var(--mozilla-green);
+      --button-background-color-primary-hover: color-mix(in oklab, var(--mozilla-green) 85%, #000000);
+      --button-background-color-primary-active: color-mix(in oklab, var(--mozilla-green) 72%, #000000);
+      --button-border-color-primary: var(--mozilla-green);
+      --button-text-color-primary: #000000;
+      --button-text-color-primary-hover: #000000;
+      --button-text-color-primary-active: #000000;
+      --link-color: var(--text-color);
+      --link-color-visited: var(--text-color);
+      --link-color-hover: var(--text-color);
+      --link-color-active: var(--text-color);
+      --table-header-background-color: var(--text-color);
+      --table-header-text-color: var(--background-color-canvas);
+      --table-background-color: var(--background-color-canvas);
+      --table-row-background-color: var(--background-color-canvas);
+      --table-row-background-color-alternate: color-mix(in srgb, currentColor 6%, transparent);
+      /* Mozilla charts: one green series against grey is the house style.
+       * Only three brand colors survive CVD and contrast checks in both
+       * schemes; green-1 and orange-1 are close for protan readers, so a
+       * third series needs direct labels. Slots 4 and 5 fall back to grey. */
+      --chart-1: var(--mozilla-green-m1);
+      --chart-2: var(--mozilla-pink-m1);
+      --chart-3: var(--mozilla-orange-m1);
+      --chart-4: var(--chart-neutral);
+      --chart-5: var(--chart-neutral);
+      --chart-neutral: light-dark(#6d6d6d, #b3b3b3);
+      --chart-divider: var(--background-color-canvas);
+      --chart-seq-1: light-dark(#cef5eb, #0a5656);
+      --chart-seq-2: light-dark(#87e3cd, #41bfae);
+      --chart-seq-3: light-dark(#41bfae, #87e3cd);
+      --chart-seq-4: light-dark(#0a5656, #cef5eb);
+      --chart-seq-5: light-dark(#022611, #ffffff);
+      --chart-diverging-low: light-dark(var(--mozilla-pink-m1), var(--mozilla-pink));
+      --chart-diverging-mid: light-dark(#e8e8e8, #414141);
+      --chart-diverging-high: light-dark(#0a5656, #87e3cd);
+    }
+    :root[data-brand="mozilla"] .moz-promo {
+      --promo-background-color-vibrant: var(--background-color-box-info);
+      --promo-message-text-color-vibrant: var(--text-color);
+    }
+    :root[data-brand="mozilla"] .moz-badge {
+      --badge-background-color-filled: var(--mozilla-green);
+      --badge-text-color-filled: #000000;
+      --badge-border-color-filled: var(--mozilla-green);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------------
+ * Base elements (common-shared.css + text-and-typography.css)
+ * ------------------------------------------------------------------------ */
+@layer moz-base {
+  :root {
+    color-scheme: light dark;
+    font-family: var(--font-family);
+    font-size: var(--font-size-root);
+    line-height: var(--line-height-body);
+    background-color: var(--background-color-canvas);
+    color: var(--text-color);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  :root[data-color-scheme="light"] { color-scheme: light; }
+  :root[data-color-scheme="dark"] { color-scheme: dark; }
+
+  @media not (forced-colors) {
+    :root { accent-color: var(--color-accent-primary); }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  :where([hidden]) { display: none !important; }
+
+  body { margin: 0; }
+
+  h1, h2, h3, h4, h5, h6 {
+    margin-block: 0 var(--space-small);
+    line-height: var(--line-height-heading);
+    font-weight: var(--font-weight-heading);
+    text-wrap: balance;
+  }
+  h1, .heading-xlarge {
+    font-family: var(--font-family-heading);
+    font-stretch: var(--font-stretch-heading);
+    font-size: var(--font-size-heading-xlarge);
+    font-weight: var(--font-weight-display);
+    letter-spacing: var(--letter-spacing-display);
+  }
+  h2, .heading-large {
+    font-family: var(--font-family-heading);
+    font-stretch: var(--font-stretch-heading);
+    font-size: var(--font-size-heading-large);
+    font-weight: var(--font-weight-headline);
+  }
+  h3, .heading-medium { font-size: var(--font-size-heading-medium); }
+  h4, h5, h6 { font-size: var(--font-size-root); }
+
+  p, ul, ol, dl, blockquote, figure, pre, table { margin-block: 0 var(--space-large); }
+  ul, ol { padding-inline-start: var(--space-xlarge); }
+  li + li { margin-block-start: var(--space-xsmall); }
+  p, li { text-wrap: pretty; }
+  strong, b { font-weight: var(--font-weight-semibold); }
+  small { font-size: var(--font-size-small); }
+
+  hr {
+    border-style: solid none none none;
+    border-width: var(--border-width);
+    border-color: var(--border-color);
+    margin-block: var(--space-xlarge);
+  }
+
+  img, svg, video, canvas { max-width: 100%; }
+  img { height: auto; }
+
+  a, .text-link {
+    color: var(--link-color);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    cursor: pointer;
+  }
+  a:visited { color: var(--link-color-visited); }
+  a:hover, .text-link:hover { color: var(--link-color-hover); }
+  a:hover:active, .text-link:hover:active { color: var(--link-color-active); text-decoration: none; }
+  a:focus-visible, .text-link:focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: var(--link-focus-outline-offset);
+    border-radius: var(--link-border-radius-focus);
+  }
+  button.text-link {
+    appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+  }
+
+  code, kbd, samp, pre { font-family: var(--font-family-mono); font-size: 0.933em; }
+  :not(pre) > code {
+    padding: 0.1em 0.3em;
+    border-radius: var(--border-radius-xsmall);
+    background-color: color-mix(in srgb, currentColor 8%, transparent);
+  }
+  pre {
+    padding: var(--space-medium) var(--space-large);
+    border: var(--border-width) solid var(--border-color-deemphasized);
+    border-radius: var(--border-radius-medium);
+    background-color: var(--background-color-box);
+    overflow: auto;
+    line-height: 1.45;
+  }
+  kbd {
+    padding: 0.05em 0.35em;
+    border: var(--border-width) solid var(--border-color);
+    border-block-end-width: 2px;
+    border-radius: var(--border-radius-xsmall);
+    background-color: var(--background-color-box);
+  }
+
+  blockquote {
+    margin-inline: 0;
+    padding-inline-start: var(--space-large);
+    border-inline-start: 3px solid var(--color-accent-primary);
+  }
+
+  :focus-visible { outline: var(--focus-outline); outline-offset: var(--focus-outline-offset); }
+
+  /* Form controls styled bare, as in Firefox's about: pages. */
+  input:where([type="email"], [type="tel"], [type="text"], [type="password"],
+              [type="url"], [type="number"], [type="search"], [type="date"],
+              [type="datetime-local"], [type="month"], [type="time"], [type="week"]),
+  textarea {
+    appearance: none;
+    box-sizing: border-box;
+    min-height: var(--input-min-height);
+    max-width: 100%;
+    padding: var(--space-xsmall) var(--space-medium);
+    border: var(--input-border);
+    border-radius: var(--input-border-radius);
+    background-color: var(--input-background-color);
+    color: var(--input-text-color);
+    font: inherit;
+  }
+  input[type="search"] {
+    border-radius: var(--input-search-border-radius);
+  }
+  textarea { padding-block: var(--space-small); min-height: 5lh; resize: vertical; }
+  input:where([type="email"], [type="tel"], [type="text"], [type="password"],
+              [type="url"], [type="number"], [type="search"]):focus-visible,
+  textarea:focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: -1px;
+  }
+  input:user-invalid, textarea:user-invalid, [aria-invalid="true"] {
+    border-color: var(--border-color-error);
+  }
+  input:disabled, textarea:disabled {
+    border-color: var(--input-border-color-disabled);
+    opacity: var(--input-opacity-disabled);
+  }
+  ::placeholder { color: var(--text-color-deemphasized); opacity: 1; }
+
+  input:where([type="checkbox"], [type="radio"]) {
+    width: var(--checkbox-size);
+    height: var(--checkbox-size);
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  label { cursor: default; }
+  fieldset { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
+  legend { padding: 0; font-weight: var(--font-weight-semibold); }
+
+  /* Text helpers (text-and-typography.css). */
+  .text-deemphasized { font-size: var(--font-size-small); color: var(--text-color-deemphasized); }
+  .text-error { color: var(--text-color-error); font-weight: var(--font-weight-semibold); }
+  .text-truncated-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .text-box-trim-start { margin-block-start: calc((1cap - 1lh) / 2); }
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+  .flip-y { scale: 1 -1; }
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0; border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media print {
+    :root { color-scheme: light; }
+    * { box-shadow: none !important; }
+    .moz-card, .moz-message-bar, .moz-stat, figure, tr { break-inside: avoid; }
+    .moz-page-nav, .no-print { display: none !important; }
+  }
+}
+
+/* ------------------------------------------------------------------------
+ * Components
+ * ------------------------------------------------------------------------ */
+@layer moz-components {
+  /* Icons: inline SVG from assets/icons (fill="currentColor"). */
+  .moz-icon {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    flex-shrink: 0;
+    fill: currentColor;
+    vertical-align: -0.2em;
+  }
+  .moz-icon.xsmall { width: var(--icon-size-xsmall); height: var(--icon-size-xsmall); }
+  .moz-icon.medium { width: var(--icon-size-medium, 20px); height: var(--icon-size-medium, 20px); }
+  .moz-icon.large { width: var(--icon-size-large); height: var(--icon-size-large); }
+
+  /* Logos: inline SVG from assets/logos. Wordmarks use currentColor, which
+   * the brand requires to be strong black or strong white. */
+  .moz-logo {
+    display: block;
+    height: var(--logo-height, 32px);
+    width: auto;
+    min-height: 20px;
+    color: light-dark(#000000, #ffffff);
+    flex-shrink: 0;
+  }
+
+  /* ---- Page layout ---------------------------------------------------- */
+  .moz-page {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-xxlarge);
+    min-height: 100vh;
+  }
+  .moz-main {
+    flex: 1;
+    min-width: 0;
+    max-width: calc(var(--page-main-content-width) + 2 * var(--page-gutter));
+    margin-inline: auto;
+    padding: var(--page-space-block-start) var(--page-gutter) var(--space-xxlarge);
+  }
+  .moz-main.wide { max-width: calc(var(--page-wide-content-width) + 2 * var(--page-gutter)); }
+  .moz-main.full { max-width: none; }
+  .moz-page > .moz-main { margin-inline: 0; }
+  .moz-section { margin-block-end: var(--space-xxlarge); }
+  .moz-section > :is(h2, h3):first-child { margin-block-end: var(--space-medium); }
+  .moz-stack { display: flex; flex-direction: column; gap: var(--space-large); }
+  .moz-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-small); }
+  .moz-grid {
+    display: grid;
+    gap: var(--space-large);
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--grid-min, 16rem), 100%), 1fr));
+  }
+
+  @media (max-width: 720px) {
+    :root { --page-gutter: var(--space-large); --page-space-block-start: var(--space-xxlarge); }
+    .moz-page { flex-direction: column; align-items: stretch; gap: 0; }
+  }
+
+  /* ---- Page header (moz-page-header) --------------------------------- */
+  .moz-page-header { margin-block-end: var(--space-xlarge); }
+  .moz-page-header .heading {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-small);
+    min-height: var(--button-min-height);
+  }
+  .moz-page-header :is(h1, h2) { margin: 0; }
+  .moz-page-header .description { margin: var(--space-xsmall) 0 0; color: var(--text-color-deemphasized); }
+  .moz-page-header .meta { margin: var(--space-xsmall) 0 0; font-size: var(--font-size-small); color: var(--text-color-deemphasized); }
+
+  /* ---- Button (moz-button) ------------------------------------------- */
+  :where(button:not(.text-link, .moz-box-item, .moz-page-nav-button, .unstyled), .moz-button, input:is([type="button"], [type="submit"], [type="reset"])) {
+    appearance: none;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: var(--button-content-alignment);
+    gap: var(--space-small);
+    min-height: var(--button-min-height);
+    padding: var(--button-padding-block) var(--button-padding-inline);
+    border: var(--button-border);
+    border-radius: var(--button-border-radius);
+    background-color: var(--button-background-color);
+    color: var(--button-text-color);
+    font: inherit;
+    font-size: var(--button-font-size);
+    font-weight: var(--button-font-weight);
+    line-height: normal;
+    text-decoration: none;
+    white-space: nowrap;
+    user-select: none;
+    position: relative;
+    vertical-align: middle;
+
+    &:hover {
+      background-color: var(--button-background-color-hover);
+      border-color: var(--button-border-color-hover);
+      color: var(--button-text-color-hover);
+    }
+    &:hover:active:not(:disabled) {
+      background-color: var(--button-background-color-active);
+      border-color: var(--button-border-color-active);
+      color: var(--button-text-color-active);
+    }
+    &:is([aria-pressed="true"], [aria-expanded="true"], [aria-selected="true"]):not(:hover, :disabled) {
+      background-color: var(--button-background-color-selected);
+      border-color: var(--button-border-color-selected);
+      color: var(--button-text-color-selected);
+    }
+    &:disabled, &[aria-disabled="true"] {
+      background-color: var(--button-background-color-disabled);
+      border-color: var(--button-border-color-disabled);
+      color: var(--button-text-color-disabled);
+      opacity: var(--button-opacity-disabled);
+      pointer-events: none;
+    }
+    &:focus-visible { outline: var(--focus-outline); outline-offset: var(--focus-outline-offset); }
+    & .moz-icon { fill: var(--button-icon-fill); }
+  }
+  :where(a.moz-button):visited { color: var(--button-text-color); }
+
+  :where(.moz-button, button, input).primary,
+  :where(button, input)[type="submit"]:not(.ghost, .destructive) {
+    background-color: var(--button-background-color-primary);
+    border-color: var(--button-border-color-primary);
+    color: var(--button-text-color-primary);
+    &:hover {
+      background-color: var(--button-background-color-primary-hover);
+      border-color: var(--button-border-color-primary-hover);
+      color: var(--button-text-color-primary-hover);
+    }
+    &:hover:active:not(:disabled) {
+      background-color: var(--button-background-color-primary-active);
+      border-color: var(--button-border-color-primary-active);
+      color: var(--button-text-color-primary-active);
+    }
+    &:is([aria-pressed="true"], [aria-expanded="true"], [aria-selected="true"]):not(:hover, :disabled) {
+      background-color: var(--button-background-color-primary-selected);
+      border-color: var(--button-border-color-primary-selected);
+      color: var(--button-text-color-primary-selected);
+    }
+    &:disabled, &[aria-disabled="true"] {
+      background-color: var(--button-background-color-primary-disabled);
+      border-color: var(--button-border-color-primary-disabled);
+      color: var(--button-text-color-primary-disabled);
+    }
+    &:visited { color: var(--button-text-color-primary); }
+  }
+
+  :where(.moz-button, button).destructive {
+    background-color: var(--button-background-color-destructive);
+    border-color: var(--button-border-color-destructive);
+    color: var(--button-text-color-destructive);
+    &:hover {
+      background-color: var(--button-background-color-destructive-hover);
+      border-color: var(--button-border-color-destructive-hover);
+      color: var(--button-text-color-destructive-hover);
+    }
+    &:hover:active:not(:disabled) {
+      background-color: var(--button-background-color-destructive-active);
+      border-color: var(--button-border-color-destructive-active);
+      color: var(--button-text-color-destructive-active);
+    }
+    &:disabled, &[aria-disabled="true"] {
+      background-color: var(--button-background-color-destructive-disabled);
+      border-color: var(--button-border-color-destructive-disabled);
+      color: var(--button-text-color-destructive-disabled);
+    }
+  }
+
+  :where(.moz-button, button).ghost {
+    background-color: var(--button-background-color-ghost);
+    border-color: var(--button-border-color-ghost);
+    color: var(--button-text-color-ghost);
+    &:hover {
+      background-color: var(--button-background-color-ghost-hover);
+      border-color: var(--button-border-color-ghost-hover);
+      color: var(--button-text-color-ghost-hover);
+    }
+    &:hover:active:not(:disabled) {
+      background-color: var(--button-background-color-ghost-active);
+      border-color: var(--button-border-color-ghost-active);
+      color: var(--button-text-color-ghost-active);
+    }
+    &:is([aria-pressed="true"], [aria-expanded="true"], [aria-selected="true"]):not(:hover, :disabled) {
+      background-color: var(--button-background-color-ghost-selected);
+      border-color: var(--button-border-color-ghost-selected);
+      color: var(--button-text-color-ghost-selected);
+    }
+    &:disabled, &[aria-disabled="true"] {
+      background-color: var(--button-background-color-ghost-disabled);
+      border-color: var(--button-border-color-ghost-disabled);
+      color: var(--button-text-color-ghost-disabled);
+    }
+  }
+
+  :where(.moz-button, button).small {
+    min-height: var(--button-min-height-small);
+    padding: var(--button-padding-block-small) var(--button-padding-inline-small);
+    font-size: var(--button-font-size-small);
+  }
+  :where(.moz-button, button).large {
+    min-height: var(--button-min-height-large);
+    padding: var(--button-padding-block-large) var(--button-padding-inline-large);
+  }
+  :where(.moz-button, button).icon {
+    width: var(--button-size-icon);
+    height: var(--button-size-icon);
+    min-height: 0;
+    padding: var(--button-padding-icon);
+    justify-content: center;
+    &.small { width: var(--button-size-icon-small); height: var(--button-size-icon-small); }
+  }
+  :where(.moz-button, button).attention::after {
+    content: "";
+    position: absolute;
+    inset-block-start: var(--space-xxsmall);
+    inset-inline-end: var(--space-xxsmall);
+    width: var(--button-badge-size);
+    height: var(--button-badge-size);
+    border-radius: var(--border-radius-circle);
+    background-color: var(--button-attention-dot-color);
+  }
+
+  /* moz-button-group: primary last (macOS/Linux convention). */
+  .moz-button-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-small);
+  }
+  .moz-button-group.start { justify-content: flex-start; }
+
+  /* ---- Card (moz-card) ------------------------------------------------ */
+  .moz-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--card-gap-article);
+    padding: var(--card-padding);
+    border: var(--card-border);
+    border-radius: var(--card-border-radius);
+    background-color: var(--card-background-color);
+    box-shadow: var(--card-box-shadow);
+    font-size: var(--card-font-size);
+    overflow-wrap: break-word;
+    min-width: 0;
+  }
+  .moz-card.compact {
+    --card-border-radius: var(--card-border-radius-compact);
+    --card-padding: var(--card-padding-compact);
+    --card-gap: var(--card-gap-compact);
+    --card-font-size: var(--card-font-size-compact);
+  }
+  .moz-card.interactive:hover { box-shadow: var(--card-box-shadow-hover); }
+  .moz-card-heading {
+    display: flex;
+    align-items: center;
+    gap: var(--card-gap);
+    margin: 0;
+    font-family: var(--font-family);
+    font-stretch: normal;
+    font-size: var(--card-font-size);
+    font-weight: var(--font-weight-heading);
+    letter-spacing: normal;
+    line-height: var(--line-height-heading);
+  }
+  .moz-card-content { margin: 0; }
+  .moz-card-content > :last-child { margin-block-end: 0; }
+  .moz-card-cover {
+    margin: calc(var(--card-padding) * -1) calc(var(--card-padding) * -1) 0;
+    padding: var(--card-cover-image-padding);
+  }
+  .moz-card-cover img {
+    display: block;
+    width: 100%;
+    height: var(--card-cover-image-height-default, 160px);
+    object-fit: cover;
+    border-radius: var(--card-cover-image-border-radius);
+  }
+
+  /* Accordion card: <details class="moz-card accordion"><summary>... */
+  details.moz-card.accordion {
+    padding: 0;
+    gap: 0;
+    & > summary {
+      display: flex;
+      align-items: center;
+      gap: var(--card-gap);
+      padding: var(--card-padding);
+      border-radius: var(--card-border-radius);
+      background-color: var(--card-header-background-color);
+      color: var(--card-header-text-color);
+      font-weight: var(--font-weight-heading);
+      list-style: none;
+      cursor: pointer;
+      &::-webkit-details-marker { display: none; }
+      &::after {
+        content: "";
+        margin-inline-start: auto;
+        width: var(--icon-size);
+        height: var(--icon-size);
+        background-color: currentColor;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M12.53 5.97a.75.75 0 0 1 0 1.06l-3.97 3.97a.75.75 0 0 1-1.06 0L3.53 7.03a.75.75 0 0 1 1.06-1.06L8 9.38l3.47-3.41a.75.75 0 0 1 1.06 0'/%3E%3C/svg%3E") center / contain no-repeat;
+      }
+      &:hover { background-color: var(--card-header-background-color-hover); }
+      &:active { background-color: var(--card-header-background-color-active); }
+      &:focus-visible { outline: var(--card-focus-outline); outline-offset: var(--focus-outline-inset); }
+    }
+    &[open] > summary {
+      border-end-start-radius: 0;
+      border-end-end-radius: 0;
+      &::after { rotate: 180deg; }
+    }
+    & > .moz-card-content { padding: 0 var(--card-padding) var(--card-padding); }
+  }
+
+  /* ---- Message bar (moz-message-bar) ---------------------------------- */
+  .moz-message-bar {
+    display: flex;
+    gap: var(--message-bar-container-gap);
+    min-height: var(--message-bar-container-min-height);
+    padding-block: var(--message-bar-container-padding-block);
+    padding-inline: var(--message-bar-container-padding-inline);
+    border: var(--message-bar-border-width) solid var(--message-bar-border-color);
+    border-radius: var(--message-bar-border-radius);
+    background-color: var(--message-bar-background-color);
+    color: var(--message-bar-text-color);
+    text-align: start;
+    margin-block-end: var(--space-large);
+
+    & > .icon-container {
+      display: flex;
+      justify-content: center;
+      align-items: var(--message-bar-icon-container-align-items);
+      height: var(--message-bar-icon-container-height);
+      padding: calc(var(--message-bar-icon-container-padding) - var(--message-bar-icon-container-padding-offset));
+      padding-block-start: calc(var(--message-bar-icon-container-padding-block-start) - var(--message-bar-icon-container-padding-offset));
+      margin-block-start: calc(var(--message-bar-icon-container-margin-block-start) + var(--message-bar-icon-container-margin-block-start-offset));
+      background-color: var(--message-bar-icon-background-color);
+      border: var(--message-bar-icon-container-border);
+      border-start-start-radius: var(--message-bar-icon-container-border-radius-start-start);
+      border-end-start-radius: var(--message-bar-icon-container-border-radius-end-start);
+      border-start-end-radius: var(--message-bar-icon-container-border-radius-start-end);
+      border-end-end-radius: var(--message-bar-icon-container-border-radius-end-end);
+      color: var(--message-bar-icon-color);
+    }
+    & > .icon-container > .moz-icon {
+      width: var(--message-bar-icon-size);
+      height: var(--message-bar-icon-size);
+      vertical-align: 0;
+    }
+    & > .content {
+      display: flex;
+      flex-grow: 1;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--message-bar-content-gap);
+      min-width: 0;
+      padding-block: var(--message-bar-content-padding-block);
+      padding-inline: var(--message-bar-content-padding-inline);
+    }
+    & .text {
+      display: flex;
+      flex-wrap: wrap;
+      flex: 1 1 20ch;
+      gap: var(--message-bar-text-content-gap);
+      padding-block: var(--message-bar-text-container-padding-block);
+      word-break: break-word;
+      line-height: var(--line-height-heading);
+    }
+    & .heading { font-weight: var(--font-weight-heading); }
+    & .actions { display: inline-flex; gap: var(--message-bar-actions-gap); }
+    & .actions :is(button, .moz-button) { padding: var(--message-bar-actions-button-padding); }
+    & > .close {
+      margin-block-start: var(--message-bar-close-margin-block-start);
+      margin-inline-end: var(--message-bar-close-margin-inline-end);
+      align-self: flex-start;
+    }
+  }
+  @media not (prefers-contrast) {
+    .moz-message-bar.warning {
+      --message-bar-background-color: var(--message-bar-background-color-warning);
+      --message-bar-icon-background-color: var(--message-bar-icon-background-color-warning);
+      --message-bar-icon-color: var(--icon-color-warning);
+    }
+    .moz-message-bar.success {
+      --message-bar-background-color: var(--message-bar-background-color-success);
+      --message-bar-icon-background-color: var(--message-bar-icon-background-color-success);
+      --message-bar-icon-color: var(--icon-color-success);
+    }
+    .moz-message-bar:is(.critical, .error) {
+      --message-bar-background-color: var(--message-bar-background-color-critical);
+      --message-bar-icon-background-color: var(--message-bar-icon-background-color-critical);
+      --message-bar-icon-color: var(--icon-color-critical);
+    }
+  }
+
+  /* ---- Form fields (moz-checkbox, moz-radio, moz-toggle layout) ------- */
+  .moz-field {
+    display: grid;
+    grid-template-columns: var(--field-control-width, var(--checkbox-size)) 1fr;
+    column-gap: var(--space-small);
+    align-items: start;
+    & > label { display: contents; }
+    & > label > :is(input, .track) {
+      /* Centered on the first line, nudged 1px to the text's optical center. */
+      margin-block-start: calc((1lh - var(--checkbox-size)) / 2 + 1px);
+    }
+    & > label > .text { grid-column: 2; }
+    & > .description {
+      grid-column: 2;
+      margin: var(--space-xxsmall) 0 0;
+      font-size: var(--font-size-small);
+      color: var(--text-color-deemphasized);
+    }
+    & > .nested {
+      grid-column: 2;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-large);
+      margin-block-start: var(--space-large);
+    }
+    &:has(> label > input:disabled) > :is(label, .description) { color: var(--text-color-disabled); }
+  }
+
+  /* Label above control: <div class="moz-input"><label/><input/>...</div> */
+  .moz-input {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xsmall);
+    & > :is(input, textarea) { width: 100%; max-width: var(--input-text-max-width, none); }
+    & > .description { margin: 0; font-size: var(--font-size-small); color: var(--text-color-deemphasized); }
+    & > .error { margin: 0; color: var(--text-color-error); font-size: var(--font-size-small); }
+    & .required { color: var(--text-color-deemphasized); font-weight: normal; }
+  }
+
+  /* moz-fieldset */
+  .moz-fieldset {
+    & > legend { display: flex; align-items: baseline; gap: var(--space-small); }
+    & > .description { margin: var(--space-xsmall) 0 0; color: var(--text-color-deemphasized); }
+    & > .inputs { display: flex; flex-direction: column; gap: var(--space-large); margin-block-start: var(--space-small); }
+    & > .inputs.horizontal { flex-direction: row; flex-wrap: wrap; gap: var(--space-small) var(--space-medium); }
+  }
+
+  /* moz-toggle: <label class="moz-toggle"><input type="checkbox" role="switch">
+   * <span class="track"></span> Label</label>. No script needed. */
+  .moz-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-small);
+    & > input {
+      position: absolute;
+      opacity: 0;
+      width: var(--toggle-width);
+      height: var(--toggle-height);
+      margin: 0;
+    }
+    & > .track {
+      display: inline-block;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      width: var(--toggle-width);
+      height: var(--toggle-height);
+      border: var(--toggle-border-width) solid var(--toggle-border-color);
+      border-radius: var(--toggle-border-radius);
+      background-color: var(--toggle-background-color);
+    }
+    & > .track::before {
+      content: "";
+      display: block;
+      width: var(--toggle-dot-width);
+      height: var(--toggle-dot-height);
+      margin: var(--toggle-dot-margin);
+      border-radius: var(--toggle-border-radius);
+      background-color: var(--toggle-dot-background-color);
+      translate: 0;
+    }
+    &:hover > input:enabled + .track {
+      background-color: var(--toggle-background-color-hover);
+      border-color: var(--toggle-border-color-hover);
+    }
+    & > input:checked + .track {
+      background-color: var(--toggle-background-color-pressed);
+      border-color: transparent;
+    }
+    &:hover > input:checked:enabled + .track { background-color: var(--toggle-background-color-pressed-hover); }
+    & > input:checked + .track::before {
+      translate: var(--toggle-dot-transform-x);
+      background-color: var(--toggle-dot-background-color-on-pressed);
+    }
+    &:dir(rtl) > input:checked + .track::before { translate: calc(-1 * var(--toggle-dot-transform-x)); }
+    & > input:focus-visible + .track { outline: var(--focus-outline); outline-offset: var(--focus-outline-offset); }
+    & > input:disabled + .track { opacity: var(--toggle-opacity-disabled); }
+    &:has(> input:disabled) { color: var(--text-color-disabled); }
+  }
+  .moz-field > label.moz-toggle { display: contents; }
+  .moz-field:has(.moz-toggle) { --field-control-width: var(--toggle-width); }
+  @media (prefers-reduced-motion: no-preference) {
+    .moz-toggle > .track::before { transition: translate 100ms; }
+  }
+  @media (forced-colors) {
+    .moz-toggle > input:checked + .track { border-color: ButtonText; }
+  }
+
+  /* moz-select: wrap the native <select>; the chevron is drawn here. */
+  .moz-select {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    border: var(--select-border);
+    border-radius: var(--select-border-radius);
+    background-color: var(--select-background-color);
+    color: var(--select-text-color);
+    &:hover {
+      border-color: var(--select-border-color-hover);
+      background-color: var(--select-background-color-hover);
+      color: var(--select-text-color-hover);
+    }
+    &:has(select:disabled) {
+      border-color: var(--select-border-color-disabled);
+      background-color: var(--select-background-color-disabled);
+      color: var(--select-text-color-disabled);
+      opacity: var(--select-opacity-disabled);
+    }
+    &:has(select:focus-visible) { outline: var(--focus-outline); outline-offset: var(--focus-outline-offset); }
+    &::after {
+      content: "";
+      position: absolute;
+      inset-inline-end: var(--select-space-inline);
+      width: var(--icon-size);
+      height: var(--icon-size);
+      background-color: currentColor;
+      pointer-events: none;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M12.53 5.97a.75.75 0 0 1 0 1.06l-3.97 3.97a.75.75 0 0 1-1.06 0L3.53 7.03a.75.75 0 0 1 1.06-1.06L8 9.38l3.47-3.41a.75.75 0 0 1 1.06 0'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+    & > select {
+      appearance: none;
+      width: 100%;
+      min-height: var(--select-min-height);
+      margin: 0;
+      padding-block: var(--select-padding-block);
+      padding-inline: var(--select-space-inline) calc(var(--select-space-inline) + var(--select-padding-icon) + var(--space-small));
+      border: none;
+      border-radius: var(--select-border-radius);
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-size: var(--select-font-size);
+      font-weight: var(--select-font-weight);
+      text-overflow: ellipsis;
+      &:focus-visible { outline: none; }
+      & option { font-weight: var(--select-option-font-weight); color: var(--select-option-text-color); background-color: var(--background-color-box); }
+    }
+    &.small > select { min-height: var(--select-min-height-small); font-size: var(--select-font-size-small); }
+  }
+
+  /* ---- Badge (moz-badge) ---------------------------------------------- */
+  .moz-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xsmall);
+    width: fit-content;
+    padding: var(--badge-padding-block) var(--badge-padding-inline);
+    border-radius: var(--badge-border-radius);
+    outline: var(--badge-border-width) solid var(--badge-border-color);
+    outline-offset: calc(-1 * var(--badge-border-width));
+    background-color: var(--badge-background-color);
+    color: var(--badge-text-color);
+    font-size: var(--font-size-small);
+    font-weight: var(--badge-font-weight);
+    line-height: var(--line-height-heading);
+    vertical-align: middle;
+    white-space: nowrap;
+    & .moz-icon { width: var(--icon-size-xsmall); height: var(--icon-size-xsmall); }
+    &.new {
+      background-color: var(--badge-background-color-filled);
+      color: var(--badge-text-color-filled);
+      outline-color: var(--badge-border-color-filled);
+    }
+  }
+
+  /* ---- Box item / group / button / link (moz-box-*) ------------------- */
+  .moz-box-group {
+    display: block;
+    border: var(--box-border);
+    border-radius: var(--box-border-radius);
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    & > .moz-box-item, & > li > .moz-box-item {
+      border: 0;
+      border-radius: 0;
+    }
+    & > .moz-box-item + .moz-box-item, & > li + li { border-block-start: var(--box-border); margin: 0; }
+  }
+  .moz-box-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-small);
+    padding: var(--box-padding);
+    border: var(--box-border);
+    border-radius: var(--box-border-radius);
+    background-color: var(--background-color-box);
+    color: inherit;
+    text-align: start;
+    & > .moz-icon { width: var(--box-icon-size); height: var(--box-icon-size); fill: var(--box-icon-fill); }
+    &.medium-icon { --box-icon-size: var(--icon-size-large); }
+    &.large-icon { --box-icon-size: var(--icon-size-xlarge); }
+    & > .text { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--space-xxsmall); min-width: 0; }
+    & .label { font-weight: var(--box-label-font-weight, normal); }
+    & .description { font-size: var(--font-size-small); color: var(--text-color-deemphasized); }
+    & > .actions { display: flex; align-items: center; gap: var(--space-small); flex-shrink: 0; }
+  }
+  :is(button, a).moz-box-item {
+    appearance: none;
+    width: 100%;
+    font: inherit;
+    text-decoration: none;
+    background-color: var(--box-button-background-color);
+    color: var(--box-button-text-color);
+    cursor: pointer;
+    &:hover { background-color: var(--box-button-background-color-hover); color: var(--box-button-text-color-hover); }
+    &:hover:active { background-color: var(--box-button-background-color-active); }
+    &:focus-visible { outline: var(--focus-outline); outline-offset: var(--focus-outline-inset); }
+    &:disabled { opacity: var(--button-opacity-disabled); }
+    &:visited { color: var(--box-button-text-color); }
+    & > .nav-icon:dir(rtl) { scale: -1 1; }
+  }
+  .moz-box-group > :is(button, a).moz-box-item { border-radius: 0; }
+
+  /* ---- Page nav (moz-page-nav) ---------------------------------------- */
+  .moz-page-nav {
+    position: sticky;
+    top: 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--page-nav-gap);
+    width: var(--size-sidebar);
+    max-height: 100vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    margin-inline-start: var(--page-nav-margin-inline-start);
+    padding: var(--page-nav-margin-block-start) var(--page-nav-focus-padding) var(--space-large);
+    & > .heading {
+      display: flex;
+      align-items: center;
+      gap: var(--space-small);
+      margin: 0;
+      font-size: var(--font-size-xlarge);
+      font-weight: var(--font-weight-heading);
+      & .moz-logo { --logo-height: var(--page-nav-heading-logo-size); min-height: 0; }
+    }
+    & > .group { display: grid; gap: var(--page-nav-button-gap); }
+    & hr { margin: 0; height: 1px; border: 0; background-color: var(--page-nav-hr-background-color); }
+  }
+  .moz-page-nav-button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-medium);
+    padding: var(--page-nav-button-padding);
+    border: var(--border-width) solid var(--page-nav-button-border-color);
+    border-radius: var(--page-nav-button-border-radius);
+    background-color: var(--page-nav-button-background-color);
+    color: var(--page-nav-button-text-color);
+    font: inherit;
+    font-weight: normal;
+    text-align: start;
+    text-decoration: none;
+    cursor: pointer;
+    &:visited { color: var(--page-nav-button-text-color); }
+    &:hover:not([aria-current]) {
+      background-color: var(--page-nav-button-background-color-hover);
+      color: var(--page-nav-button-text-color-hover);
+      &:active { background-color: var(--page-nav-button-background-color-active); }
+    }
+    &[aria-current]:not([aria-current="false"]), &[aria-selected="true"] {
+      background-color: var(--page-nav-button-background-color-selected);
+      color: var(--page-nav-button-text-color-selected);
+      font-weight: var(--font-weight-semibold);
+    }
+    &:focus-visible {
+      outline: var(--focus-outline);
+      outline-offset: var(--page-nav-focus-outline-offset);
+      border-radius: var(--page-nav-button-border-radius-focused);
+    }
+    & .moz-icon { fill: currentColor; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .moz-page-nav-button { transition: background-color 150ms; }
+  }
+  @media (max-width: 950px) {
+    .moz-page-nav { width: auto; margin-inline-start: var(--space-small); }
+    .moz-page-nav .moz-page-nav-button .label { display: none; }
+    .moz-page-nav > .heading .label { display: none; }
+  }
+  @media (max-width: 720px) {
+    .moz-page-nav {
+      position: static;
+      flex-direction: row;
+      flex-wrap: wrap;
+      width: 100%;
+      max-height: none;
+      margin: 0;
+      padding: var(--space-large);
+      & > .group { display: flex; flex-wrap: wrap; }
+      & hr { display: none; }
+    }
+    .moz-page-nav .moz-page-nav-button .label { display: inline; }
+  }
+
+  /* ---- Segmented control (moz-segmented-control) ---------------------- */
+  .moz-segmented-control {
+    display: inline-flex;
+    width: fit-content;
+    align-self: flex-start;
+    gap: var(--space-xsmall);
+    max-width: 100%;
+    padding: var(--segmented-control-padding);
+    border: var(--segmented-control-border);
+    border-radius: var(--segmented-control-border-radius);
+    & > label {
+      flex: 1;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-small);
+      min-width: var(--button-size-icon);
+      min-height: var(--button-min-height);
+      padding: var(--button-padding-block) var(--button-padding-inline);
+      border: var(--border-width) solid var(--button-border-color-ghost);
+      border-radius: var(--button-border-radius);
+      background-color: var(--button-background-color-ghost);
+      color: var(--button-text-color-ghost);
+      font-weight: var(--button-font-weight);
+      white-space: nowrap;
+      cursor: pointer;
+      &:hover { background-color: var(--button-background-color-ghost-hover); color: var(--button-text-color-ghost-hover); }
+      &:has(input:checked) {
+        background-color: var(--button-background-color-primary);
+        border-color: var(--button-border-color-primary);
+        color: var(--button-text-color-primary);
+      }
+      &:has(input:focus-visible) { outline: var(--focus-outline); outline-offset: var(--focus-outline-offset); }
+      & > input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+    }
+  }
+
+  /* ---- Promo (moz-promo) ---------------------------------------------- */
+  .moz-promo {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-medium);
+    padding: var(--promo-padding);
+    border: var(--promo-border);
+    border-radius: var(--promo-border-radius);
+    background-color: var(--promo-background-color);
+    color: var(--promo-message-text-color);
+    overflow: hidden;
+    margin-block-end: var(--space-large);
+    flex-wrap: wrap;
+    & > .text { display: flex; flex: 1 1 18rem; flex-direction: column; gap: var(--space-small); }
+    & .heading {
+      margin: 0;
+      font-family: var(--font-family);
+      font-stretch: normal;
+      font-size: var(--font-size-heading-medium);
+      color: var(--promo-heading-text-color);
+    }
+    & .message { margin: 0; }
+    & > img, & > .image { width: var(--promo-image-size); flex-shrink: 0; align-self: center; }
+    &.image-large > img, &.image-large > .image { width: var(--promo-image-size-large); }
+    &.vibrant {
+      background-color: var(--promo-background-color-vibrant);
+      border-color: var(--promo-border-color-vibrant);
+      color: var(--promo-message-text-color-vibrant);
+      & .heading { color: var(--promo-heading-text-color-vibrant); }
+    }
+    & > .close { position: absolute; inset-block-start: var(--space-small); inset-inline-end: var(--space-small); }
+  }
+
+  /* ---- Support link (moz-support-link) -------------------------------- */
+  .support-link { display: inline-block; margin-inline-start: var(--space-xsmall); }
+
+  /* ---- Dialog --------------------------------------------------------- */
+  dialog.moz-dialog {
+    max-width: min(32rem, calc(100vw - 2 * var(--space-large)));
+    padding: var(--dialog-padding);
+    border: var(--border-width) solid var(--dialog-border-color, var(--border-color-deemphasized));
+    border-radius: var(--dialog-border-radius, var(--border-radius-large));
+    background-color: var(--dialog-background-color, var(--background-color-box));
+    color: var(--text-color);
+    box-shadow: var(--dialog-box-shadow, var(--box-shadow-level-3));
+    &::backdrop { background-color: var(--background-color-overlay); }
+    & > h2 { font-size: var(--font-size-heading-medium); font-family: var(--font-family); font-stretch: normal; }
+    & > .moz-button-group { margin-block-start: var(--space-xlarge); }
+  }
+
+  /* ---- Table (Acorn table tokens) ------------------------------------- */
+  .moz-table-wrapper {
+    overflow-x: auto;
+    overflow-wrap: normal;
+    border: var(--border-width) solid var(--border-color-deemphasized);
+    border-radius: var(--border-radius-medium);
+    margin-block-end: var(--space-large);
+    & > .moz-table { margin: 0; }
+    & > .moz-table > caption { padding: var(--space-small) var(--space-medium); }
+  }
+  .moz-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--table-background-color);
+    font-variant-numeric: tabular-nums;
+    & caption {
+      caption-side: top;
+      padding-block-end: var(--space-small);
+      text-align: start;
+      font-weight: var(--font-weight-semibold);
+    }
+    & :is(th, td) {
+      padding: var(--space-small) var(--space-medium);
+      text-align: start;
+      vertical-align: top;
+      border-block-end: var(--border-width) solid var(--border-color-deemphasized);
+    }
+    & thead th {
+      background-color: var(--table-header-background-color);
+      color: var(--table-header-text-color);
+      font-weight: var(--font-weight-semibold);
+      vertical-align: bottom;
+      border-block-end: 0;
+    }
+    & tbody tr { background-color: var(--table-row-background-color); }
+    &.striped tbody tr:nth-child(even) { background-color: var(--table-row-background-color-alternate); }
+    & tbody tr:last-child > * { border-block-end: 0; }
+    & :is(th, td).num { text-align: end; }
+    &.compact :is(th, td) { padding: var(--space-xsmall) var(--space-small); font-size: var(--font-size-small); }
+    &.plain {
+      background-color: transparent;
+      & thead th {
+        background-color: transparent;
+        color: var(--text-color-deemphasized);
+        border-block-end: var(--border-width) solid var(--border-color);
+      }
+      & tbody tr { background-color: transparent; }
+    }
+  }
+
+  /* ---- Stat tile (dashboard KPI; built from tokens) ------------------- */
+  .moz-stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxsmall);
+    & .label { font-size: var(--font-size-small); color: var(--text-color-deemphasized); }
+    & .value {
+      font-family: var(--font-family-heading);
+      font-stretch: var(--font-stretch-number);
+      font-size: var(--stat-font-size, var(--font-size-xxxlarge));
+      font-weight: var(--font-weight-number);
+      letter-spacing: var(--letter-spacing-display);
+      line-height: 1.1;
+    }
+    & .value .unit { font-size: 0.5em; letter-spacing: normal; }
+    & .delta {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xsmall);
+      font-size: var(--font-size-small);
+    }
+    & .delta.good .moz-icon { color: var(--icon-color-success); }
+    & .delta.bad .moz-icon { color: var(--icon-color-critical); }
+    & .delta.neutral .moz-icon { color: var(--icon-color); }
+  }
+
+  /* ---- Pull quote ----------------------------------------------------- */
+  .moz-pull-quote {
+    margin: 0 0 var(--space-xlarge);
+    max-width: 46rem;
+    & blockquote { margin: 0 0 var(--space-medium); }
+    & blockquote p {
+      margin: 0;
+      font-family: var(--font-family-heading);
+      font-size: var(--font-size-heading-large);
+      line-height: 1.2;
+    }
+    & figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-small); }
+    & .name { font-weight: var(--font-weight-semibold); }
+  }
+
+  /* ---- Empty state ---------------------------------------------------- */
+  .moz-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-small);
+    padding: var(--space-xxlarge) var(--space-large);
+    text-align: center;
+    color: var(--text-color-deemphasized);
+    & .heading { margin: 0; font-size: var(--font-size-heading-medium); font-family: var(--font-family); font-stretch: normal; color: var(--text-color); }
+    & p { margin: 0; max-width: 40ch; }
+  }
+
+  /* ---- Charts --------------------------------------------------------- */
+  .moz-chart {
+    margin: 0 0 var(--space-large);
+    overflow-x: auto;
+    & figcaption { margin-block-end: var(--space-small); font-weight: var(--font-weight-semibold); }
+    & .summary { margin-block: var(--space-small) 0; font-size: var(--font-size-small); color: var(--text-color-deemphasized); }
+    & svg { display: block; width: 100%; min-width: var(--chart-min-width, 0); height: auto; overflow: visible; }
+    & svg .mark-gap { stroke: var(--chart-divider); stroke-width: 2; }
+    & svg text { fill: var(--text-color-deemphasized); }
+    & svg .label { fill: var(--text-color); }
+    & svg .gridline { stroke: var(--chart-gridline); stroke-width: 1; }
+    & svg .axis { stroke: var(--border-color); stroke-width: 1; }
+  }
+  .moz-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xsmall) var(--space-large);
+    margin: var(--space-small) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--font-size-small);
+    & li { display: inline-flex; align-items: center; gap: var(--space-xsmall); margin: 0; }
+    & .swatch { width: 0.75rem; height: 0.75rem; border-radius: var(--border-radius-xsmall); background: var(--swatch); flex-shrink: 0; }
+  }
+
+  /* ---- Brand hero (data-brand pages only) ----------------------------- */
+  .moz-hero {
+    padding: var(--space-xxlarge) var(--page-gutter);
+    margin-block-end: var(--space-xxlarge);
+    & .display {
+      margin: 0 0 var(--space-medium);
+      font-family: var(--font-family-heading);
+      font-stretch: var(--font-stretch-heading);
+      font-weight: var(--font-weight-hero);
+      font-size: clamp(2.6rem, 6vw, 4.5rem);
+      line-height: 0.9;
+      letter-spacing: var(--letter-spacing-display);
+      max-width: 18ch;
+    }
+    & .lede { margin: 0; font-size: var(--font-size-large); max-width: 55ch; }
+    & .moz-row { margin-block-start: var(--space-xlarge); }
+  }
+  .moz-hero + .moz-main { padding-block-start: 0; }
+  /* The hero is a dark island: tokens are light-dark() pairs, so forcing the
+   * dark scheme here switches every component inside it consistently. */
+  @media not ((prefers-contrast) or (forced-colors)) {
+    :root:is([data-brand="firefox"], [data-brand="mozilla"]) .moz-hero {
+      color-scheme: dark;
+      color: var(--text-color);
+    }
+    :root[data-brand="firefox"] .moz-hero { background: var(--firefox-gradient-dark); }
+    /* The hairline only shows when the page itself is dark. */
+    :root[data-brand="mozilla"] .moz-hero {
+      background-color: var(--mozilla-black);
+      box-shadow: 0 1px 0 rgb(255 255 255 / 0.2);
+    }
+  }
+
+  /* Header bar for brand pages: logo anchored to a corner. */
+  .moz-masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-large);
+    padding: var(--space-large) var(--page-gutter);
+  }
+  :root[data-brand="mozilla"] .moz-masthead { flex-direction: row-reverse; }
+}

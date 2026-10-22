@@ -1,0 +1,65 @@
+{
+  "experiment": "timestamps",
+  "durationSeconds": 22,
+  "stalls": [
+    {
+      "atSeconds": 5,
+      "durationMs": 100
+    },
+    {
+      "atSeconds": 10,
+      "durationMs": 200
+    },
+    {
+      "atSeconds": 15,
+      "durationMs": 500
+    }
+  ],
+  "trials": [
+    {
+      "browser": "chrome",
+      "path": "mstp",
+      "videoPpm": 200
+    },
+    {
+      "browser": "firefox",
+      "path": "worker",
+      "videoPpm": 200
+    },
+    {
+      "browser": "safari",
+      "path": "worker",
+      "videoPpm": 200
+    },
+    {
+      "browser": "chrome",
+      "path": "mstp",
+      "videoPpm": 0
+    },
+    {
+      "browser": "firefox",
+      "path": "worker",
+      "videoPpm": 0
+    },
+    {
+      "browser": "safari",
+      "path": "worker",
+      "videoPpm": 0
+    },
+    {
+      "browser": "chrome",
+      "path": "mstp",
+      "videoPpm": -200
+    },
+    {
+      "browser": "firefox",
+      "path": "worker",
+      "videoPpm": -200
+    },
+    {
+      "browser": "safari",
+      "path": "worker",
+      "videoPpm": -200
+    }
+  ]
+}

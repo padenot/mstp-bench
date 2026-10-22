@@ -1,0 +1,59 @@
+{
+  "experiment": "playout",
+  "rounds": 3,
+  "arms": [
+    {
+      "browser": "firefox",
+      "path": "audioworklet",
+      "quantum": 128,
+      "realtime": true
+    },
+    {
+      "browser": "firefox",
+      "path": "audioworklet",
+      "quantum": 512,
+      "realtime": true
+    },
+    {
+      "browser": "firefox",
+      "path": "worker",
+      "quantum": 128,
+      "realtime": true
+    },
+    {
+      "browser": "chrome",
+      "path": "audioworklet",
+      "quantum": 128,
+      "realtime": true
+    },
+    {
+      "browser": "chrome",
+      "path": "audioworklet",
+      "quantum": 512,
+      "realtime": true
+    },
+    {
+      "browser": "chrome",
+      "path": "worker",
+      "quantum": 128,
+      "realtime": true
+    },
+    {
+      "browser": "chrome",
+      "path": "mstp",
+      "quantum": 128,
+      "realtime": true
+    }
+  ],
+  "duration": 60,
+  "dsp": {
+    "mode": "copy"
+  },
+  "load": null,
+  "stalls": [
+    {
+      "atSeconds": 5,
+      "durationMs": 500
+    }
+  ]
+}

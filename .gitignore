@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+# Summaries are committed; raw trial data and dated runs stay local.
+results/*/*/
+results/*-2*/
+*.log
